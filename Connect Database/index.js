@@ -11,10 +11,15 @@ app.use(express.urlencoded({extended: true}));
 const productsSchema = new mongoose.Schema({ 
     title: {
         type: String,
-        required: true,
+        required: [true, "product title is required"],
+        minlength: [3, "minimum length of the product title should be 3"],
+        maxlength: [10, "maximum length of the product title should be 10"],
+        trim: true
     },
     price:  {
         type: Number,
+        min: [200, "minimu price of the product should be 200"],
+        max:[2000, "maximu price of the product should be 2000"],
         required: true,
     },
     rating:  {
@@ -149,7 +154,7 @@ app.put("/products/:id", async (req, res) => {
                     rating: req.body.rating
                 }
             },
-            {new: true}   
+            {new: true}   // update value show 
         );
         if(updatedproduct) {
             res.status(200).send({
