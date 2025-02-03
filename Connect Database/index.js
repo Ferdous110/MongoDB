@@ -68,9 +68,9 @@ app.get("/products", async (req, res) => {
                 {price: {$gt: price}}, 
                 {rating: {$gt: rating}}
         ]
-            });
+            }).sort({price: 1});
         }else{
-            products = await Product.find();
+            products = await Product.find().sort({price: 1});
         }
         
         if(products) {
@@ -98,7 +98,7 @@ app.get("/products/:id", async (req, res) => {
         if(product) {
             res.status(200).send({
                 success: true,
-                message: "return single product",
+                message: "product was not found with this id",
                 data: product
             });
         } else {
@@ -110,7 +110,63 @@ app.get("/products/:id", async (req, res) => {
     } catch (error) {
         res.status(500).send({ message: error.message });
     }
-}) 
+}) ;
+
+// delete produtcs
+
+app.delete("/products/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const product = await Product.findByIdAndDelete({_id: id});
+        if(product) {
+            res.status(200).send({
+                success: true,
+                message: "delete single product",
+                data: product
+            });
+        } else {
+            res.status(404).send({
+                success: false,
+                message: "product was not deleted with this id"
+            })
+        }
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+}) ;
+
+// update products
+
+app.put("/products/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const updatedproduct = await Product.findByIdAndUpdate({_id: id},
+            {
+                $set: {
+                    title: req.body.title,
+                    price: req.body.price,
+                    description:req.body.description,
+                    rating: req.body.rating
+                }
+            },
+            {new: true}   
+        );
+        if(updatedproduct) {
+            res.status(200).send({
+                success: true,
+                message: "update single product",
+                data: updatedproduct
+            });
+        } else {
+            res.status(404).send({
+                success: false,
+                message: "product was not updated with this id"
+            })
+        }
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+}) ;
 
 // mongoose.connect('mongodb://127.0.0.1:27017/testProductDB')
 // .then(()=> console.log("DB is connected"))
