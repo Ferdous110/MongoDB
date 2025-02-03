@@ -54,7 +54,14 @@ app.post("/products", async (req, res)=> {
 
 app.get("/products", async (req, res) => {
     try {
-        const products = await Product.find();
+        const price = req.query.price;
+        let products
+        if(price){
+             products = await Product.find({price: { $gt: price}});
+        }else{
+            products = await Product.find();
+        }
+        
         if(products) {
             res.status(200).send({
                 success: true,
