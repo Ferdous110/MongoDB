@@ -30,6 +30,16 @@ const productsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    phone:  {
+        type: String,
+        required: [true, "phone number is required"],
+        validate: {
+            validator: function(v){
+                return /\d{3}-\d{3}-\d{4}/.test(v)
+        },
+        massage: (props) => `${props.value} is not a valid phone number`
+     }
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -50,7 +60,8 @@ app.post("/products", async (req, res)=> {
         title: req.body.title,
         price:  req.body.price,
         rating:  req.body.rating,
-        description: req.body.description
+        description: req.body.description,
+        phone: req.body.phone
      })
      const productData = await newProduct.save();
 
