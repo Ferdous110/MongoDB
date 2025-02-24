@@ -1,3 +1,20 @@
 <%-include("layout/header")%>
-    <h1>Register  Page</h1>
+    <main>
+        <h1>Register page</h1>
+        <form action="/register" method="post">
+            <div>
+                <label for="username">username</label>
+                <input type="text" id="username" name="username">
+            </div>
+            <br>
+            <div>
+                <label for="pasword">password</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <br>
+            <div>
+                <button type="submit">Register</button>
+            </div>
+        </form>
+    </main>
     <%-include("layout/footer")%>
