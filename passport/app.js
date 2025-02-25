@@ -14,6 +14,7 @@ const app = express();
 require("./config/database")
 const User = require("./models/user.models")
 require("dotenv").config();
+require("./config/passport");
 
 app.set("view engine", "ejs");
 app.use(cors());
@@ -26,11 +27,14 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   store: MongoStore.create({
-    mongoUrl: process.env.MONG_URL,
-    collectionName: "sessions";
+    mongoUrl: process.env.MONGO_URL,
+    collectionName: "sessions"
   }),
  // cookie: { secure: true }
 }))
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 //  base url 
 app.get("/", (req, res)=> {
@@ -48,7 +52,7 @@ app.post("/register", async (req, res)=> {
                 password: hash
             });
         await newUser.save();
-        res.status(201).redirect("/login");
+        res.redirect("/login");
         });
        
     } catch (error) {
@@ -59,29 +63,51 @@ app.post("/register", async (req, res)=> {
 app.get("/register", (req, res)=> {
     res.render("register")
 })
+
+const checkLoggedIn = (req, res, next) => {
+    if(req.isAuthenticated()){
+        return res.redirect("/profile");
+    }
+    next();
+}
+
 // login : get 
-app.get("/login", (req, res)=> {
+app.get("/login", checkLoggedIn, (req, res)=> {
     res.render("loging")
 })
 
 // login : post 
-app.post("/register", (req, res)=> {
-    try {
-        res.status(200).send("User is logged in");
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-})
+app.post('/login', 
+    passport.authenticate('local', { failureRedirect: '/login', successRedirect: "/profile" })
+    );
 
+
+    const checkAuthenticated = (req, res, next) => {
+        if(req.isAuthenticated()){
+            return next();
+        }
+        res.redirect("/login");
+    }
+
+    
 // profile protected route 
-app.get("/profile", (req, res)=> {
-    res.render("profile")
-})
+app.get("/profile", checkAuthenticated, (req, res)=> {
+    res.render("profile");
+});
 
 // logout route 
 app.get("/logout", (req, res) => {
-    res.redirect("/");
-})
+   try {
+    req.logout((err)=>{
+        if (err){
+            return next(err);
+        }
+        res.redirect("/");
+    });
+   } catch (error) {
+    res.status(500).send(error.message);
+   }
+});
 
 
 
